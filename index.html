@@ -1,22 +1,344 @@
-
 <!DOCTYPE html>
 <html lang="es">
-<head> 
+<head>
   <meta charset="UTF-8" />
   <title>Registro Camiones / TRACTO - TRAILER - FULL</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2c3e50">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 8px 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+    }
+    .entrada { background: #27ae60; color: white; border: none; }
+    .etapa2 { background: #8e44ad; color: white; border: none; }
+    .salida { background: #c0392b; color: white; border: none; }
+    button:hover { opacity: 0.9; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+    th { background: #2980b9; color: white; }
+    #reiniciar {
+      background: #e67e22; 
+      color: white; 
+      border: none; 
+      font-size: 16px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #555;
+    }
+    #login {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #34495e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    #login input {
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
-  <h1>Registro Camiones</h1>
-  <p>Esta es una prueba de PWA para ejecutar como App.</p>
+
+  <div id="login">
+    <h2>Acceso al Sistema</h2>
+    <label>Nombre del Guardia GSI:</label>
+    <input type="text" id="nombreGuardia" placeholder="Nombre Guardia" />
+    <label>Clave de Acceso:</label>
+    <input type="password" id="claveAcceso" placeholder="Clave" />
+    <button onclick="validarAcceso()">Ingresar</button>
+  </div>
+
+  <h1>Registro Camiones / TRACTO - TRAILER - FULL</h1>
+
+  <label for="tipoUnidad">Tipo de Unidad:</label>
+  <select id="tipoUnidad" onchange="actualizarPlataformas()">
+    <option value="Tracto">Tracto</option>
+    <option value="Trailer">Trailer</option>
+    <option value="Full">Full</option>
+  </select>
+
+  <label>Placa Tracto:</label>
+  <input type="text" id="placaTracto" placeholder="Placa TRACTO / CAMIÓN" />
+
+  <div id="divPlataforma1">
+    <label>Placa Plataforma 1:</label>
+    <input type="text" id="placaPlataforma1" placeholder="Placa Plataforma 1" />
+  </div>
+
+  <div id="divPlataforma2">
+    <label>Placa Plataforma 2:</label>
+    <input type="text" id="placaPlataforma2" placeholder="Placa Plataforma 2" />
+  </div>
+
+  <label>Operación:</label>
+  <select id="operacion">
+    <option value="Carga">Carga</option>
+    <option value="Descarga">Descarga</option>
+  </select>
+
+  <br/>
+  <input type="number" id="pesoEntrada1" placeholder="Peso Entrada 1" />
+  <input type="number" id="pesoEntrada2" placeholder="Peso Entrada 2" />
+  <br/>
+  <input type="number" id="pesoSalida1" placeholder="Peso Salida 1" />
+  <input type="number" id="pesoSalida2" placeholder="Peso Salida 2" />
+
+  <br/>
+  <button class="entrada" onclick="registrarEtapa1()">Registrar Entrada 1</button>
+  <button class="etapa2" onclick="registrarEtapa2()">Registrar Entrada 2</button>
+  <button class="salida" onclick="registrarSalida()">Registrar Salida</button>
+  <button onclick="exportarExcel()">Exportar Excel</button>
+  <button onclick="exportarPDF()">Exportar PDF</button>
+
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th>Guardia</th>
+        <th>Tipo</th>
+        <th>Placa Tracto</th>
+        <th>Plataforma 1</th>
+        <th>Plataforma 2</th>
+        <th>Operación</th>
+        <th>Fecha Entrada</th>
+        <th>Hora Entrada</th>
+        <th>Peso Entrada 1</th>
+        <th>Peso Entrada 2</th>
+        <th>Fecha Salida</th>
+        <th>Hora Salida</th>
+        <th>Peso Salida 1</th>
+        <th>Peso Salida 2</th>
+        <th>Tara</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button id="reiniciar" onclick="reiniciarRegistro()">🗑️ Reiniciar Registro</button>
+
+  <footer>Desarrollado por Antonio Adrian Ovando Canales</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('Service Worker registrado', reg))
-      .catch(err => console.error('Error al registrar SW', err));
+    let registros = JSON.parse(localStorage.getItem('registrosCamiones')) || [];
+    let nombreGuardia = '';
+
+    function validarAcceso() {
+      const nombre = document.getElementById('nombreGuardia').value.trim();
+      const clave = document.getElementById('claveAcceso').value.trim();
+      if (!nombre || !clave) {
+        alert('Ingrese nombre y clave.');
+        return;
+      }
+      if (clave !== '1234') { // Cambia aquí la clave segura
+        alert('Clave incorrecta.');
+        return;
+      }
+      nombreGuardia = nombre;
+      document.getElementById('login').style.display = 'none';
     }
+
+    function actualizarPlataformas() {
+      const tipo = document.getElementById('tipoUnidad').value;
+      document.getElementById('divPlataforma1').style.display = (tipo === 'Tracto') ? 'none' : 'block';
+      document.getElementById('divPlataforma2').style.display = (tipo === 'Full') ? 'block' : 'none';
+    }
+
+    function guardarLocal() {
+      localStorage.setItem('registrosCamiones', JSON.stringify(registros));
+    }
+
+    function renderTabla() {
+      const tbody = document.querySelector('#tabla tbody');
+      tbody.innerHTML = '';
+      registros.forEach(r => {
+        const fila = `<tr>
+          <td>${r.guardia}</td>
+          <td>${r.tipo}</td>
+          <td>${r.tracto}</td>
+          <td>${r.plataforma1 || ''}</td>
+          <td>${r.plataforma2 || ''}</td>
+          <td>${r.operacion}</td>
+          <td>${r.fechaEntrada}</td>
+          <td>${r.horaEntrada}</td>
+          <td>${r.pesoEntrada1 || ''}</td>
+          <td>${r.pesoEntrada2 || ''}</td>
+          <td>${r.fechaSalida || ''}</td>
+          <td>${r.horaSalida || ''}</td>
+          <td>${r.pesoSalida1 || ''}</td>
+          <td>${r.pesoSalida2 || ''}</td>
+          <td>${r.tara || ''}</td>
+        </tr>`;
+        tbody.innerHTML += fila;
+      });
+    }
+
+    function registrarEtapa1() {
+      const tipo = document.getElementById('tipoUnidad').value;
+      const tracto = document.getElementById('placaTracto').value.trim();
+      const plataforma1 = document.getElementById('placaPlataforma1').value.trim();
+      const plataforma2 = document.getElementById('placaPlataforma2').value.trim();
+      const operacion = document.getElementById('operacion').value;
+      const pesoEntrada1 = parseFloat(document.getElementById('pesoEntrada1').value);
+
+      if (!tracto || isNaN(pesoEntrada1)) {
+        alert('Complete placa tracto y peso entrada 1');
+        return;
+      }
+
+      const ahora = new Date();
+      registros.push({
+        guardia: nombreGuardia,
+        tipo,
+        tracto,
+        plataforma1: plataforma1 || '',
+        plataforma2: plataforma2 || '',
+        operacion,
+        fechaEntrada: ahora.toLocaleDateString(),
+        horaEntrada: ahora.toLocaleTimeString(),
+        pesoEntrada1,
+        pesoEntrada2: '',
+        fechaSalida: '',
+        horaSalida: '',
+        pesoSalida1: '',
+        pesoSalida2: '',
+        tara: ''
+      });
+
+      guardarLocal();
+      renderTabla();
+    }
+
+    function registrarEtapa2() {
+      const tracto = document.getElementById('placaTracto').value.trim();
+      const pesoEntrada2 = parseFloat(document.getElementById('pesoEntrada2').value);
+
+      if (!tracto || isNaN(pesoEntrada2)) {
+        alert('Ingrese placa tracto y peso entrada 2');
+        return;
+      }
+
+      const registro = registros.find(r => r.tracto === tracto && r.pesoEntrada2 === '');
+
+      if (!registro) {
+        alert('Primero registre la entrada 1');
+        return;
+      }
+
+      registro.pesoEntrada2 = pesoEntrada2;
+      guardarLocal();
+      renderTabla();
+    }
+
+    function registrarSalida() {
+      const tracto = document.getElementById('placaTracto').value.trim();
+      const pesoSalida1 = parseFloat(document.getElementById('pesoSalida1').value);
+      const pesoSalida2 = parseFloat(document.getElementById('pesoSalida2').value) || 0;
+
+      if (!tracto || isNaN(pesoSalida1)) {
+        alert('Ingrese placa tracto y peso salida 1');
+        return;
+      }
+
+      const registro = registros.find(r => r.tracto === tracto && r.fechaSalida === '');
+
+      if (!registro) {
+        alert('Primero registre la entrada');
+        return;
+      }
+
+      const ahora = new Date();
+      registro.fechaSalida = ahora.toLocaleDateString();
+      registro.horaSalida = ahora.toLocaleTimeString();
+      registro.pesoSalida1 = pesoSalida1;
+      registro.pesoSalida2 = pesoSalida2;
+
+      const totalEntrada = parseFloat(registro.pesoEntrada1) + (parseFloat(registro.pesoEntrada2) || 0);
+      const totalSalida = pesoSalida1 + pesoSalida2;
+      registro.tara = (totalEntrada - totalSalida).toFixed(2);
+
+      guardarLocal();
+      renderTabla();
+    }
+
+    function exportarExcel() {
+      if (registros.length === 0) {
+        alert("No hay datos para exportar.");
+        return;
+      }
+      const tabla = document.getElementById('tabla');
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(tabla);
+      XLSX.utils.book_append_sheet(wb, ws, "Registros");
+      XLSX.writeFile(wb, "Registro_Camiones.xlsx");
+    }
+
+    function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.text("Registro Camiones", 20, 20);
+      const headers = [["Guardia","Tipo","Tracto","Plataforma1","Plataforma2","Operación","F Entrada","H Entrada","Peso Ent1","Peso Ent2","F Salida","H Salida","Peso Sal1","Peso Sal2","Tara"]];
+      const body = registros.map(r => [
+        r.guardia, r.tipo, r.tracto, r.plataforma1, r.plataforma2, r.operacion, r.fechaEntrada,
+        r.horaEntrada, r.pesoEntrada1, r.pesoEntrada2, r.fechaSalida, r.horaSalida,
+        r.pesoSalida1, r.pesoSalida2, r.tara
+      ]);
+
+      doc.autoTable({
+        head: headers,
+        body: body,
+        startY: 30,
+      });
+
+      doc.save("Registro_Camiones.pdf");
+    }
+
+    function reiniciarRegistro() {
+      if (confirm("¿Está seguro de borrar todo?")) {
+        registros = [];
+        guardarLocal();
+        renderTabla();
+      }
+    }
+
+    actualizarPlataformas();
+    renderTabla();
   </script>
 </body>
 </html>
